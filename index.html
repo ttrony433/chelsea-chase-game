@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chelsea Chase Game (Boss Mode)</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: white; }
+        canvas { display: block; margin: auto; }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Game size (50% bigger)
+    const WIDTH = 1800, HEIGHT = 1200;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+
+    // Colors
+    const YELLOW = 'yellow';
+    const BLACK = 'black';
+
+    // Stickman (smiley) setup
+    let stickmanRadius = 60;
+    let stickmanX = WIDTH / 2;
+    let stickmanY = HEIGHT / 2;
+    let stickmanSpeed = 12;
+
+    // Enemy setup
+    const ENEMY_SIZE = 400;
+    let enemyX = Math.random() * (WIDTH - ENEMY_SIZE);
+    let enemyY = Math.random() * (HEIGHT - ENEMY_SIZE);
+    let enemySpeed = 5.25;
+
+    // Load enemy image
+    const enemyImage = new Image();
+    enemyImage.src = 'enemy.png'; // Make sure enemy.png is in the same folder!
+
+    // Controls
+    const keys = {};
+    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+    let gameOver = false;
+
+    function drawSmiley(x, y, radius) {
+        // Face
+        ctx.fillStyle = YELLOW;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = BLACK;
+        ctx.beginPath();
+        ctx.arc(x - 22, y - 22, 8, 0, Math.PI * 2);
+        ctx.arc(x + 22, y - 22, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Smile
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(x, y, 30, Math.PI / 6, (5 * Math.PI) / 6);
+        ctx.stroke();
+    }
+
+    function checkCollision(ax, ay, aSize, bx, by, bSize) {
+        return ax < bx + bSize &&
+               ax + aSize > bx &&
+               ay < by + bSize &&
+               ay + aSize > by;
+    }
+
+    function resetGame() {
+        stickmanX = WIDTH / 2;
+        stickmanY = HEIGHT / 2;
+        enemyX = Math.random() * (WIDTH - ENEMY_SIZE);
+        enemyY = Math.random() * (HEIGHT - ENEMY_SIZE);
+        gameOver = false;
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (gameOver && e.key === 'r') resetGame();
+    });
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, WIDTH, HEIGHT); // Clear screen
+
+        if (!gameOver) {
+            // Move stickman
+            if (keys['ArrowLeft']) stickmanX -= stickmanSpeed;
+            if (keys['ArrowRight']) stickmanX += stickmanSpeed;
+            if (keys['ArrowUp']) stickmanY -= stickmanSpeed;
+            if (keys['ArrowDown']) stickmanY += stickmanSpeed;
+
+            // Keep stickman inside bounds
+            stickmanX = Math.max(stickmanRadius, Math.min(WIDTH - stickmanRadius, stickmanX));
+            stickmanY = Math.max(stickmanRadius, Math.min(HEIGHT - stickmanRadius, stickmanY));
+
+            // Enemy follows stickman
+            let dx = stickmanX - enemyX;
+            let dy = stickmanY - enemyY;
+            let distance = Math.hypot(dx, dy);
+            if (distance !== 0) {
+                dx /= distance;
+                dy /= distance;
+            }
+            enemyX += dx * enemySpeed;
+            enemyY += dy * enemySpeed;
+
+            // Draw stickman
+            drawSmiley(stickmanX, stickmanY, stickmanRadius);
+
+            // Draw enemy
+            ctx.drawImage(enemyImage, enemyX, enemyY, ENEMY_SIZE, ENEMY_SIZE);
+
+            // Check collision
+            if (checkCollision(stickmanX - stickmanRadius, stickmanY - stickmanRadius, stickmanRadius * 2, enemyX, enemyY, ENEMY_SIZE)) {
+                gameOver = true;
+            }
+        } else {
+            // Game Over screen
+            ctx.fillStyle = BLACK;
+            ctx.font = "150px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("CHELSEA GOT YOU. YOU LOSE!", WIDTH / 2, HEIGHT / 2 - 50);
+            ctx.font = "90px Arial";
+            ctx.fillText("Press 'R' to Restart", WIDTH / 2, HEIGHT / 2 + 100);
+        }
+
+        requestAnimationFrame(gameLoop); // Loop game
+    }
+
+    enemyImage.onload = gameLoop; // Start game when image is loaded
+
+</script>
+</body>
+</html>
