@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chelsea Chase Game (Responsive & Slower)</title>
+    <title>Chelsea Chase Game (Fully Responsive)</title>
     <style>
         body { margin: 0; overflow: hidden; background: white; }
         canvas { display: block; }
@@ -15,39 +15,52 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Make canvas fill screen dynamically
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initial call
-
-    // Variables (scaled based on screen size)
-    const screenRatio = Math.min(canvas.width / 1200, canvas.height / 800);
-    const stickmanRadius = 60 * screenRatio;
-    const stickmanSpeed = (12 * screenRatio) * 0.75; // ✅ 50% slower
-    const ENEMY_SIZE = 300 * screenRatio;
-    const enemySpeed = (4.5 * screenRatio) * 0.5; // ✅ retard
-
-    // Stickman setup
-    let stickmanX = canvas.width / 2;
-    let stickmanY = canvas.height / 2;
-
-    // Enemy setup
-    let enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
-    let enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+    let screenRatio, stickmanRadius, stickmanSpeed, ENEMY_SIZE, enemySpeed;
+    let stickmanX, stickmanY;
+    let enemyX, enemyY;
+    let gameOver = false;
+    const keys = {};
 
     // Load enemy image
     const enemyImage = new Image();
-    enemyImage.src = 'enemy.png'; // Ensure 'enemy.png' is uploaded with this file!
+    enemyImage.src = 'enemy.png';
+
+    // Responsive resize function
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Recalculate sizes and speeds dynamically based on new window size
+        screenRatio = Math.min(canvas.width / 1200, canvas.height / 800);
+        stickmanRadius = 60 * screenRatio;
+        stickmanSpeed = (12 * screenRatio) * 0.5; // Slower speed as requested
+        ENEMY_SIZE = 300 * screenRatio;
+        enemySpeed = (4.5 * screenRatio) * 0.5;
+
+        // Recenter stickman and enemy when resizing
+        stickmanX = canvas.width / 2;
+        stickmanY = canvas.height / 2;
+        enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
+        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Initial call
 
     // Controls
-    const keys = {};
     window.addEventListener('keydown', (e) => keys[e.key] = true);
     window.addEventListener('keyup', (e) => keys[e.key] = false);
 
-    let gameOver = false;
+    // Restart game
+    window.addEventListener('keydown', (e) => {
+        if (gameOver && e.key === 'r') resetGame();
+    });
+
+    function resetGame() {
+        resizeCanvas(); // Reset everything on restart
+        gameOver = false;
+    }
 
     // Draw smiley face
     function drawSmiley(x, y, radius) {
@@ -78,19 +91,6 @@
                ay + aSize > by;
     }
 
-    // Reset game
-    function resetGame() {
-        stickmanX = canvas.width / 2;
-        stickmanY = canvas.height / 2;
-        enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
-        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
-        gameOver = false;
-    }
-
-    window.addEventListener('keydown', (e) => {
-        if (gameOver && e.key === 'r') resetGame();
-    });
-
     // Game loop
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear screen
@@ -117,7 +117,7 @@
             enemyX += dx * enemySpeed;
             enemyY += dy * enemySpeed;
 
-            // Draw stickman
+            // Draw smiley
             drawSmiley(stickmanX, stickmanY, stickmanRadius);
 
             // Draw enemy
