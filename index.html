@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chelsea Chase Game (Boss Mode)</title>
+    <title>Chelsea Chase Game (Responsive)</title>
     <style>
         body { margin: 0; overflow: hidden; background: white; }
-        canvas { display: block; margin: auto; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
@@ -15,30 +15,32 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Game size (50% bigger)
-    const WIDTH = 1800, HEIGHT = 1200;
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
+    // Make canvas fill screen dynamically
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Initial call
 
-    // Colors
-    const YELLOW = 'yellow';
-    const BLACK = 'black';
+    // Variables (scaled based on screen size)
+    const screenRatio = Math.min(canvas.width / 1200, canvas.height / 800);
+    const stickmanRadius = 60 * screenRatio;
+    const stickmanSpeed = 12 * screenRatio;
+    const ENEMY_SIZE = 300 * screenRatio;
+    const enemySpeed = 4.5 * screenRatio;
 
-    // Stickman (smiley) setup
-    let stickmanRadius = 60;
-    let stickmanX = WIDTH / 2;
-    let stickmanY = HEIGHT / 2;
-    let stickmanSpeed = 12;
+    // Stickman setup
+    let stickmanX = canvas.width / 2;
+    let stickmanY = canvas.height / 2;
 
     // Enemy setup
-    const ENEMY_SIZE = 400;
-    let enemyX = Math.random() * (WIDTH - ENEMY_SIZE);
-    let enemyY = Math.random() * (HEIGHT - ENEMY_SIZE);
-    let enemySpeed = 5.25;
+    let enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
+    let enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
 
     // Load enemy image
     const enemyImage = new Image();
-    enemyImage.src = 'enemy.png'; // Make sure enemy.png is in the same folder!
+    enemyImage.src = 'enemy.png'; // Ensure 'enemy.png' is uploaded with this file!
 
     // Controls
     const keys = {};
@@ -47,27 +49,28 @@
 
     let gameOver = false;
 
+    // Draw smiley face
     function drawSmiley(x, y, radius) {
-        // Face
-        ctx.fillStyle = YELLOW;
+        ctx.fillStyle = 'yellow';
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
 
         // Eyes
-        ctx.fillStyle = BLACK;
+        ctx.fillStyle = 'black';
         ctx.beginPath();
-        ctx.arc(x - 22, y - 22, 8, 0, Math.PI * 2);
-        ctx.arc(x + 22, y - 22, 8, 0, Math.PI * 2);
+        ctx.arc(x - radius / 2.5, y - radius / 2.5, radius / 7, 0, Math.PI * 2);
+        ctx.arc(x + radius / 2.5, y - radius / 2.5, radius / 7, 0, Math.PI * 2);
         ctx.fill();
 
         // Smile
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 4 * screenRatio;
         ctx.beginPath();
-        ctx.arc(x, y, 30, Math.PI / 6, (5 * Math.PI) / 6);
+        ctx.arc(x, y, radius / 2, Math.PI / 6, 5 * Math.PI / 6);
         ctx.stroke();
     }
 
+    // Collision detection
     function checkCollision(ax, ay, aSize, bx, by, bSize) {
         return ax < bx + bSize &&
                ax + aSize > bx &&
@@ -75,11 +78,12 @@
                ay + aSize > by;
     }
 
+    // Reset game
     function resetGame() {
-        stickmanX = WIDTH / 2;
-        stickmanY = HEIGHT / 2;
-        enemyX = Math.random() * (WIDTH - ENEMY_SIZE);
-        enemyY = Math.random() * (HEIGHT - ENEMY_SIZE);
+        stickmanX = canvas.width / 2;
+        stickmanY = canvas.height / 2;
+        enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
+        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
         gameOver = false;
     }
 
@@ -87,8 +91,9 @@
         if (gameOver && e.key === 'r') resetGame();
     });
 
+    // Game loop
     function gameLoop() {
-        ctx.clearRect(0, 0, WIDTH, HEIGHT); // Clear screen
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear screen
 
         if (!gameOver) {
             // Move stickman
@@ -97,11 +102,11 @@
             if (keys['ArrowUp']) stickmanY -= stickmanSpeed;
             if (keys['ArrowDown']) stickmanY += stickmanSpeed;
 
-            // Keep stickman inside bounds
-            stickmanX = Math.max(stickmanRadius, Math.min(WIDTH - stickmanRadius, stickmanX));
-            stickmanY = Math.max(stickmanRadius, Math.min(HEIGHT - stickmanRadius, stickmanY));
+            // Keep stickman on screen
+            stickmanX = Math.max(stickmanRadius, Math.min(canvas.width - stickmanRadius, stickmanX));
+            stickmanY = Math.max(stickmanRadius, Math.min(canvas.height - stickmanRadius, stickmanY));
 
-            // Enemy follows stickman
+            // Enemy chases stickman
             let dx = stickmanX - enemyX;
             let dy = stickmanY - enemyY;
             let distance = Math.hypot(dx, dy);
@@ -123,19 +128,19 @@
                 gameOver = true;
             }
         } else {
-            // Game Over screen
-            ctx.fillStyle = BLACK;
-            ctx.font = "150px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("CHELSEA GOT YOU. YOU LOSE!", WIDTH / 2, HEIGHT / 2 - 50);
-            ctx.font = "90px Arial";
-            ctx.fillText("Press 'R' to Restart", WIDTH / 2, HEIGHT / 2 + 100);
+            // Game over screen
+            ctx.fillStyle = 'black';
+            ctx.font = `${100 * screenRatio}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText("CHELSEA GOT YOU. YOU LOSE!", canvas.width / 2, canvas.height / 2 - 50 * screenRatio);
+            ctx.font = `${60 * screenRatio}px Arial`;
+            ctx.fillText("Press 'R' to Restart", canvas.width / 2, canvas.height / 2 + 60 * screenRatio);
         }
 
-        requestAnimationFrame(gameLoop); // Loop game
+        requestAnimationFrame(gameLoop); // Keep game running
     }
 
-    enemyImage.onload = gameLoop; // Start game when image is loaded
+    enemyImage.onload = gameLoop; // Start game when image loads
 
 </script>
 </body>
