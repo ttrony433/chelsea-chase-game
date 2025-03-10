@@ -26,9 +26,9 @@
     // Variables (scaled based on screen size)
     const screenRatio = Math.min(canvas.width / 1200, canvas.height / 800);
     const stickmanRadius = 60 * screenRatio;
-    const stickmanSpeed = (12 * screenRatio) * 0.5; // ✅ 50% slower
+    const stickmanSpeed = (12 * screenRatio) * 0.75; // ✅ 50% slower
     const ENEMY_SIZE = 300 * screenRatio;
-    const enemySpeed = (4.5 * screenRatio) * 0.5; // ✅ 50% slower
+    const enemySpeed = (4.5 * screenRatio) * 0.5; // ✅ retard
 
     // Stickman setup
     let stickmanX = canvas.width / 2;
