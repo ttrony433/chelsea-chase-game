@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chelsea Chase Game (Fully Responsive)</title>
+    <title>Chelsea Chase Game (Fully Responsive Dynamic)</title>
     <style>
         body { margin: 0; overflow: hidden; background: white; }
         canvas { display: block; }
@@ -15,38 +15,47 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let screenRatio, stickmanRadius, stickmanSpeed, ENEMY_SIZE, enemySpeed;
-    let stickmanX, stickmanY;
-    let enemyX, enemyY;
-    let gameOver = false;
     const keys = {};
+    let gameOver = false;
+
+    // Game variables (will be set dynamically)
+    let screenRatio, stickmanRadius, stickmanSpeed, ENEMY_SIZE, enemySpeed, fontSizeBig, fontSizeSmall;
+    let stickmanX, stickmanY, enemyX, enemyY;
 
     // Load enemy image
     const enemyImage = new Image();
-    enemyImage.src = 'enemy.png';
+    enemyImage.src = 'enemy.png'; // Make sure this file is present
 
     // Responsive resize function
-    function resizeCanvas() {
+    function resizeCanvas(init = false) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Recalculate sizes and speeds dynamically based on new window size
+        // Dynamic ratio based on window
         screenRatio = Math.min(canvas.width / 1200, canvas.height / 800);
-        stickmanRadius = 60 * screenRatio;
-        stickmanSpeed = (12 * screenRatio) * 0.5; // Slower speed as requested
-        ENEMY_SIZE = 300 * screenRatio;
-        enemySpeed = (4.5 * screenRatio) * 0.5;
 
-        // Recenter stickman and enemy when resizing
-        stickmanX = canvas.width / 2;
-        stickmanY = canvas.height / 2;
-        enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
-        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+        // Dynamically set all game element sizes and speeds
+        stickmanRadius = 60 * screenRatio;
+        stickmanSpeed = (12 * screenRatio) * 0.5; // Slow down 50%
+        ENEMY_SIZE = 300 * screenRatio;
+        enemySpeed = (4.5 * screenRatio) * 0.5; // Slow down 50%
+
+        // Font sizes for game over screen
+        fontSizeBig = 100 * screenRatio;
+        fontSizeSmall = 60 * screenRatio;
+
+        // If it's first time, initialize positions in center
+        if (init) {
+            stickmanX = canvas.width / 2;
+            stickmanY = canvas.height / 2;
+            enemyX = Math.random() * (canvas.width - ENEMY_SIZE);
+            enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+        }
     }
 
-    // Handle window resize
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initial call
+    // Handle window resize dynamically
+    window.addEventListener('resize', () => resizeCanvas(false));
+    resizeCanvas(true); // Initial call to set everything up
 
     // Controls
     window.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -58,7 +67,7 @@
     });
 
     function resetGame() {
-        resizeCanvas(); // Reset everything on restart
+        resizeCanvas(true); // Reset everything and re-center
         gameOver = false;
     }
 
@@ -96,17 +105,17 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear screen
 
         if (!gameOver) {
-            // Move stickman
+            // Move smiley (stickman)
             if (keys['ArrowLeft']) stickmanX -= stickmanSpeed;
             if (keys['ArrowRight']) stickmanX += stickmanSpeed;
             if (keys['ArrowUp']) stickmanY -= stickmanSpeed;
             if (keys['ArrowDown']) stickmanY += stickmanSpeed;
 
-            // Keep stickman on screen
+            // Stay within bounds
             stickmanX = Math.max(stickmanRadius, Math.min(canvas.width - stickmanRadius, stickmanX));
             stickmanY = Math.max(stickmanRadius, Math.min(canvas.height - stickmanRadius, stickmanY));
 
-            // Enemy chases stickman
+            // Enemy chases smiley
             let dx = stickmanX - enemyX;
             let dy = stickmanY - enemyY;
             let distance = Math.hypot(dx, dy);
@@ -128,16 +137,16 @@
                 gameOver = true;
             }
         } else {
-            // Game over screen
+            // Game Over screen
             ctx.fillStyle = 'black';
-            ctx.font = `${100 * screenRatio}px Arial`;
+            ctx.font = `${fontSizeBig}px Arial`;
             ctx.textAlign = 'center';
             ctx.fillText("CHELSEA GOT YOU. YOU LOSE!", canvas.width / 2, canvas.height / 2 - 50 * screenRatio);
-            ctx.font = `${60 * screenRatio}px Arial`;
+            ctx.font = `${fontSizeSmall}px Arial`;
             ctx.fillText("Press 'R' to Restart", canvas.width / 2, canvas.height / 2 + 60 * screenRatio);
         }
 
-        requestAnimationFrame(gameLoop); // Keep game running
+        requestAnimationFrame(gameLoop); // Loop the game
     }
 
     enemyImage.onload = gameLoop; // Start game when image loads
