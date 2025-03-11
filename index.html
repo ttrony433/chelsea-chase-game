@@ -46,10 +46,17 @@
         if (init) resetGame();
     }
 
-    // Controls
-    window.addEventListener('keydown', (e) => keys[e.key] = true);
-    window.addEventListener('keyup', (e) => keys[e.key] = false);
+// Controls
+window.addEventListener('keydown', (e) => keys[e.key] = true);
+window.addEventListener('keyup', (e) => keys[e.key] = false);
 
+// Start & Restart
+window.addEventListener('keydown', (e) => {
+    if (!gameStarted && e.key === ' ') gameStarted = true; // ✅ Start game on Space
+    if (gameOver && e.key === 'r') resetGame(); // ✅ Restart game on R
+});
+
+    
     // Reset game and positions
 function resetGame() {
     // Check if new high score
