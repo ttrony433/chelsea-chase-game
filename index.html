@@ -53,7 +53,7 @@
     // Start & Restart
     window.addEventListener('keydown', (e) => {
         if (!gameStarted && e.key === ' ') gameStarted = true;
-        if (gameOver && e.key === 'r') resetGame();
+        if ( && e.key === 'r') resetGame();
     });
 
     // Reset game and positions
@@ -67,7 +67,7 @@
         stickmanY = canvas.height / 2;
         placeEnemyAtEdge();
         placeCoinRandomly();
-        gameOver = false;
+         = false;
         coinCollected = 0;
         playerHasMoved = false; // ✅ Reset when game starts
     }
@@ -149,12 +149,11 @@
         } else if (!gameOver) {
             // Show "RUN!!!" warning before player starts moving
     if (!playerHasMoved) {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = 'black'; // ✅ Black color
         ctx.font = `${fontSizeBig}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText("RUN!!!", canvas.width / 2, canvas.height / 2);
-
-            }
+        ctx.fillText("RUN!!!", canvas.width / 2, canvas.height / 2 - 100 * screenRatio); // ✅ Moved higher
+    }
             
             // Move player
             if (keys['ArrowLeft']) { stickmanX -= stickmanSpeed; playerHasMoved = true; }
