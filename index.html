@@ -20,6 +20,7 @@
     let gameOver = false;
     let coinCollected = 0;
     let highScore = 0; // ✅ Track highest coins collected
+    let playerHasMoved = false; // ✅ Track if player has moved
 
     let screenRatio, stickmanRadius, stickmanSpeed, ENEMY_SIZE, enemySpeed, fontSizeBig, fontSizeSmall, coinRadius;
     let stickmanX, stickmanY, enemyX, enemyY, coinX, coinY;
@@ -68,18 +69,19 @@
         placeCoinRandomly();
         gameOver = false;
         coinCollected = 0;
+        playerHasMoved = false; // ✅ Reset when game starts
     }
 
     // Place enemy on random edge
     function placeEnemyAtEdge() {
-    const side = Math.floor(Math.random() * 2); // 0 or 1 only
-    if (side === 0) { // Left wall
-        enemyX = 0;
-        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
-    } else { // Right wall
-        enemyX = canvas.width - ENEMY_SIZE;
-        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
-    
+        const side = Math.floor(Math.random() * 2); // 0 or 1 only
+        if (side === 0) { // Left wall
+            enemyX = 0;
+            enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+        } else { // Right wall
+            enemyX = canvas.width - ENEMY_SIZE;
+            enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+        }
     }
 
     // Place coin randomly
@@ -123,14 +125,14 @@
                ay + aSize > by;
     }
 
-// Adjusted collision check with smaller enemy hitbox (10% reduction)
-function checkEnemyCollision(ax, ay, aSize, bx, by, bSize) {
-    const reducedSize = bSize * 0.75; // Reduce hitbox by 25%
-    const offset = (bSize - reducedSize) / 2; // Center the smaller hitbox inside the enemy sprite
-    return ax < bx + offset + reducedSize &&
-           ax + aSize > bx + offset &&
-           ay < by + offset + reducedSize &&
-           ay + aSize > by + offset;
+    // Adjusted collision check with smaller enemy hitbox (25% reduction)
+    function checkEnemyCollision(ax, ay, aSize, bx, by, bSize) {
+        const reducedSize = bSize * 0.75;
+        const offset = (bSize - reducedSize) / 2;
+        return ax < bx + offset + reducedSize &&
+               ax + aSize > bx + offset &&
+               ay < by + offset + reducedSize &&
+               ay + aSize > by + offset;
     }
 
     // Main game loop
@@ -146,21 +148,23 @@ function checkEnemyCollision(ax, ay, aSize, bx, by, bSize) {
             ctx.fillText("Press 'Space' to Start", canvas.width / 2, canvas.height / 2 + 50 * screenRatio);
         } else if (!gameOver) {
             // Move player
-            if (keys['ArrowLeft']) stickmanX -= stickmanSpeed;
-            if (keys['ArrowRight']) stickmanX += stickmanSpeed;
-            if (keys['ArrowUp']) stickmanY -= stickmanSpeed;
-            if (keys['ArrowDown']) stickmanY += stickmanSpeed;
+            if (keys['ArrowLeft']) { stickmanX -= stickmanSpeed; playerHasMoved = true; }
+            if (keys['ArrowRight']) { stickmanX += stickmanSpeed; playerHasMoved = true; }
+            if (keys['ArrowUp']) { stickmanY -= stickmanSpeed; playerHasMoved = true; }
+            if (keys['ArrowDown']) { stickmanY += stickmanSpeed; playerHasMoved = true; }
 
             stickmanX = Math.max(stickmanRadius, Math.min(canvas.width - stickmanRadius, stickmanX));
             stickmanY = Math.max(stickmanRadius, Math.min(canvas.height - stickmanRadius, stickmanY));
 
-            // Enemy chase logic
-            let dx = stickmanX - enemyX;
-            let dy = stickmanY - enemyY;
-            let distance = Math.hypot(dx, dy);
-            if (distance !== 0) { dx /= distance; dy /= distance; }
-            enemyX += dx * enemySpeed;
-            enemyY += dy * enemySpeed;
+            // Enemy chase logic (only if player has moved)
+            if (playerHasMoved) {
+                let dx = stickmanX - enemyX;
+                let dy = stickmanY - enemyY;
+                let distance = Math.hypot(dx, dy);
+                if (distance !== 0) { dx /= distance; dy /= distance; }
+                enemyX += dx * enemySpeed;
+                enemyY += dy * enemySpeed;
+            }
 
             // Draw game elements
             drawSmiley(stickmanX, stickmanY, stickmanRadius);
@@ -199,7 +203,6 @@ function checkEnemyCollision(ax, ay, aSize, bx, by, bSize) {
     enemyImage.onload = () => resizeCanvas(true);
     resizeCanvas(true);
     gameLoop();
-
 </script>
 </body>
 </html>
