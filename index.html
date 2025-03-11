@@ -19,6 +19,7 @@
     let gameStarted = false;
     let gameOver = false;
     let coinCollected = 0;
+    let highScore = 0; // ✅ Track highest coins collected
 
     let screenRatio, stickmanRadius, stickmanSpeed, ENEMY_SIZE, enemySpeed, fontSizeBig, fontSizeSmall, coinRadius;
     let stickmanX, stickmanY, enemyX, enemyY, coinX, coinY;
@@ -26,7 +27,7 @@
     const enemyImage = new Image();
     enemyImage.src = 'enemy.png';
 
-    // Resize and reset dynamic variables
+    // Responsive setup
     function resizeCanvas(init = false) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -48,14 +49,19 @@
     window.addEventListener('keydown', (e) => keys[e.key] = true);
     window.addEventListener('keyup', (e) => keys[e.key] = false);
 
-    // Start game on Space
+    // Start & Restart
     window.addEventListener('keydown', (e) => {
         if (!gameStarted && e.key === ' ') gameStarted = true;
         if (gameOver && e.key === 'r') resetGame();
     });
 
-    // Reset positions and counters
+    // Reset game and positions
     function resetGame() {
+        // Check if new high score
+        if (coinCollected > highScore) {
+            highScore = coinCollected; // ✅ Update high score
+        }
+
         stickmanX = canvas.width / 2;
         stickmanY = canvas.height / 2;
         placeEnemyAtEdge();
@@ -64,7 +70,7 @@
         coinCollected = 0;
     }
 
-    // Place enemy at random edge
+    // Place enemy on random edge
     function placeEnemyAtEdge() {
         const side = Math.floor(Math.random() * 4);
         if (side === 0) { enemyX = 0; enemyY = Math.random() * (canvas.height - ENEMY_SIZE); }
@@ -98,17 +104,15 @@
         ctx.stroke();
     }
 
-    // Draw coin
+    // Draw coin (solid)
     function drawCoin(x, y, radius) {
-        ctx.globalAlpha = 0.5; // 100% transparent
         ctx.fillStyle = 'orange';
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         ctx.fill();
-        ctx.globalAlpha = 1.0; // Reset transparency
     }
 
-    // Collision detection
+    // Collision check
     function checkCollision(ax, ay, aSize, bx, by, bSize) {
         return ax < bx + bSize &&
                ax + aSize > bx &&
@@ -116,7 +120,7 @@
                ay + aSize > by;
     }
 
-    // Game loop
+    // Main game loop
     function gameLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -128,7 +132,7 @@
             ctx.font = `${fontSizeSmall}px Arial`;
             ctx.fillText("Press 'Space' to Start", canvas.width / 2, canvas.height / 2 + 50 * screenRatio);
         } else if (!gameOver) {
-            // Move smiley
+            // Move player
             if (keys['ArrowLeft']) stickmanX -= stickmanSpeed;
             if (keys['ArrowRight']) stickmanX += stickmanSpeed;
             if (keys['ArrowUp']) stickmanY -= stickmanSpeed;
@@ -137,7 +141,7 @@
             stickmanX = Math.max(stickmanRadius, Math.min(canvas.width - stickmanRadius, stickmanX));
             stickmanY = Math.max(stickmanRadius, Math.min(canvas.height - stickmanRadius, stickmanY));
 
-            // Enemy chases smiley
+            // Enemy chase logic
             let dx = stickmanX - enemyX;
             let dy = stickmanY - enemyY;
             let distance = Math.hypot(dx, dy);
@@ -145,32 +149,35 @@
             enemyX += dx * enemySpeed;
             enemyY += dy * enemySpeed;
 
-            // Draw elements
+            // Draw game elements
             drawSmiley(stickmanX, stickmanY, stickmanRadius);
             ctx.drawImage(enemyImage, enemyX, enemyY, ENEMY_SIZE, ENEMY_SIZE);
             drawCoin(coinX, coinY, coinRadius);
 
-            // Coin collection
+            // Coin collect
             if (checkCollision(stickmanX - stickmanRadius, stickmanY - stickmanRadius, stickmanRadius * 2, coinX - coinRadius, coinY - coinRadius, coinRadius * 2)) {
                 coinCollected++;
                 placeCoinRandomly();
             }
 
-            // Draw coin counter
+            // Coin counter
             ctx.fillStyle = 'black';
             ctx.font = `${40 * screenRatio}px Arial`;
             ctx.fillText(`Coins: ${coinCollected}`, canvas.width - 150 * screenRatio, 50 * screenRatio);
 
-            // Collision with enemy
+            // Game over if caught
             if (checkCollision(stickmanX - stickmanRadius, stickmanY - stickmanRadius, stickmanRadius * 2, enemyX, enemyY, ENEMY_SIZE)) {
                 gameOver = true;
             }
+
         } else {
+            // Game Over screen with High Score
             ctx.fillStyle = 'black';
             ctx.font = `${fontSizeBig}px Arial`;
-            ctx.fillText("CHELSEA GOT YOU. YOU LOSE!", canvas.width / 2, canvas.height / 2);
+            ctx.fillText("CHELSEA GOT YOU. YOU LOSE!", canvas.width / 2, canvas.height / 2 - 50 * screenRatio);
             ctx.font = `${fontSizeSmall}px Arial`;
-            ctx.fillText("Press 'R' to Restart", canvas.width / 2, canvas.height / 2 + 80 * screenRatio);
+            ctx.fillText(`Your Coins: ${coinCollected} | High Score: ${highScore}`, canvas.width / 2, canvas.height / 2 + 50 * screenRatio);
+            ctx.fillText("Press 'R' to Restart", canvas.width / 2, canvas.height / 2 + 120 * screenRatio);
         }
 
         requestAnimationFrame(gameLoop);
