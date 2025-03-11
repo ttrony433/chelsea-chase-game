@@ -50,13 +50,7 @@
     window.addEventListener('keydown', (e) => keys[e.key] = true);
     window.addEventListener('keyup', (e) => keys[e.key] = false);
 
-    // Start & Restart
-    window.addEventListener('keydown', (e) => {
-        if (!gameStarted && e.key === ' ') gameStarted = true;
-        if ( && e.key === 'r') resetGame();
-    });
-
-   // Reset game and positions
+    // Reset game and positions
 function resetGame() {
     // Check if new high score
     if (coinCollected > highScore) {
@@ -70,6 +64,7 @@ function resetGame() {
     gameOver = false; // ✅ Fix: Reset game over flag
     coinCollected = 0;
     playerHasMoved = false; // ✅ Reset player move tracking
+
 }
 
     // Place enemy on random edge
