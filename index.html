@@ -122,7 +122,7 @@
 
 // Adjusted collision check with smaller enemy hitbox (10% reduction)
 function checkEnemyCollision(ax, ay, aSize, bx, by, bSize) {
-    const reducedSize = bSize * 0.9; // Reduce hitbox by 10%
+    const reducedSize = bSize * 0.75; // Reduce hitbox by 25%
     const offset = (bSize - reducedSize) / 2; // Center the smaller hitbox inside the enemy sprite
     return ax < bx + offset + reducedSize &&
            ax + aSize > bx + offset &&
