@@ -176,7 +176,7 @@ function checkEnemyCollision(ax, ay, aSize, bx, by, bSize) {
             ctx.fillText(`Coins: ${coinCollected}`, canvas.width - 150 * screenRatio, 50 * screenRatio);
 
             // Game over if caught
-            if (checkCollision(stickmanX - stickmanRadius, stickmanY - stickmanRadius, stickmanRadius * 2, enemyX, enemyY, ENEMY_SIZE)) {
+            if (checkEnemyCollision(stickmanX - stickmanRadius, stickmanY - stickmanRadius, stickmanRadius * 2, enemyX, enemyY, ENEMY_SIZE)) {
                 gameOver = true;
             }
 
