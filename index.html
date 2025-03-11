@@ -147,6 +147,15 @@
             ctx.font = `${fontSizeSmall}px Arial`;
             ctx.fillText("Press 'Space' to Start", canvas.width / 2, canvas.height / 2 + 50 * screenRatio);
         } else if (!gameOver) {
+            // Show "RUN!!!" warning before player starts moving
+    if (!playerHasMoved) {
+        ctx.fillStyle = 'red';
+        ctx.font = `${fontSizeBig}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillText("RUN!!!", canvas.width / 2, canvas.height / 2);
+
+            }
+            
             // Move player
             if (keys['ArrowLeft']) { stickmanX -= stickmanSpeed; playerHasMoved = true; }
             if (keys['ArrowRight']) { stickmanX += stickmanSpeed; playerHasMoved = true; }
