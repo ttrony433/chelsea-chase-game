@@ -56,21 +56,21 @@
         if ( && e.key === 'r') resetGame();
     });
 
-    // Reset game and positions
-    function resetGame() {
-        // Check if new high score
-        if (coinCollected > highScore) {
-            highScore = coinCollected; // ✅ Update high score
-        }
-
-        stickmanX = canvas.width / 2;
-        stickmanY = canvas.height / 2;
-        placeEnemyAtEdge();
-        placeCoinRandomly();
-         = false;
-        coinCollected = 0;
-        playerHasMoved = false; // ✅ Reset when game starts
+   // Reset game and positions
+function resetGame() {
+    // Check if new high score
+    if (coinCollected > highScore) {
+        highScore = coinCollected; // ✅ Update high score
     }
+
+    stickmanX = canvas.width / 2;
+    stickmanY = canvas.height / 2;
+    placeEnemyAtEdge();
+    placeCoinRandomly();
+    gameOver = false; // ✅ Fix: Reset game over flag
+    coinCollected = 0;
+    playerHasMoved = false; // ✅ Reset player move tracking
+}
 
     // Place enemy on random edge
     function placeEnemyAtEdge() {
