@@ -72,11 +72,14 @@
 
     // Place enemy on random edge
     function placeEnemyAtEdge() {
-        const side = Math.floor(Math.random() * 4);
-        if (side === 0) { enemyX = 0; enemyY = Math.random() * (canvas.height - ENEMY_SIZE); }
-        if (side === 1) { enemyX = canvas.width - ENEMY_SIZE; enemyY = Math.random() * (canvas.height - ENEMY_SIZE); }
-        if (side === 2) { enemyX = Math.random() * (canvas.width - ENEMY_SIZE); enemyY = 0; }
-        if (side === 3) { enemyX = Math.random() * (canvas.width - ENEMY_SIZE); enemyY = canvas.height - ENEMY_SIZE; }
+    const side = Math.floor(Math.random() * 2); // 0 or 1 only
+    if (side === 0) { // Left wall
+        enemyX = 0;
+        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+    } else { // Right wall
+        enemyX = canvas.width - ENEMY_SIZE;
+        enemyY = Math.random() * (canvas.height - ENEMY_SIZE);
+    
     }
 
     // Place coin randomly
